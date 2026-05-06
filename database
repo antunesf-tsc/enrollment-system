@@ -1,0 +1,45 @@
+database/schema.sql
+
+-- Enrollment System - PostgreSQL Schema
+-- Version: 0.1
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    external_id VARCHAR(64),
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    email TEXT UNIQUE,
+    status VARCHAR(20) DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE enrollments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id),
+    enrollment_type VARCHAR(50),          -- card, biometric, combo
+    status VARCHAR(20),                   -- pending, success, failed
+    metadata JSONB,
+    started_at TIMESTAMP,
+    completed_at TIMESTAMP
+);
+
+CREATE TABLE devices (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    device_type VARCHAR(50),              -- printer, reader, camera, kiosk
+    make VARCHAR(50),
+    model VARCHAR(50),
+    serial_number VARCHAR(100),
+    location TEXT,
+    status VARCHAR(20)
+);
+
+CREATE TABLE audit_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    action TEXT,
+    entity_type TEXT,
+    entity_id UUID,
+    performed_by TEXT,
+    performed_at TIMESTAMP DEFAULT NOW()
+);
